@@ -1,5 +1,6 @@
 package com.example.camera;
 
+import android.graphics.YuvImage;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
@@ -22,6 +23,9 @@ import static android.media.MediaFormat.KEY_I_FRAME_INTERVAL;
 
 public class CodecLiveH265 extends Thread {
 
+
+    YuvImage yuvImage;
+
     private static final String TAG = "David";
     //    yuv数据   FFmpeg 牛逼多了  编码工具
     private MediaCodec mediaCodec;
@@ -40,12 +44,12 @@ public class CodecLiveH265 extends Thread {
 
         try {
 //            mediacodec  中间联系人      dsp芯片   帧
-            MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height);
+            MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
             format.setInteger(KEY_BIT_RATE, width * height);
             format.setInteger(KEY_FRAME_RATE, 20);
             format.setInteger(KEY_I_FRAME_INTERVAL, 1);
-            mediaCodec = MediaCodec.createEncoderByType("video/hevc");
+            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
             mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             Surface surface = mediaCodec.createInputSurface();
             //创建场地
@@ -83,7 +87,7 @@ public class CodecLiveH265 extends Thread {
                     writeBytes(outData);
 
                     Log.d(TAG, "视频数据  " + bufferInfo.flags);
-                    dealFrame(byteBuffer, bufferInfo);
+//                    dealFrame(byteBuffer, bufferInfo);
 
                     mediaCodec.releaseOutputBuffer(outputBufferId, false);
                 }
@@ -130,7 +134,7 @@ public class CodecLiveH265 extends Thread {
         FileOutputStream writer = null;
         try {
             // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-            writer = new FileOutputStream(Environment.getExternalStorageDirectory() + "/codec.h265", true);
+            writer = new FileOutputStream(Environment.getExternalStorageDirectory() + "/codec.h264", true);
             writer.write(array);
             writer.write('\n');
 
@@ -161,7 +165,7 @@ public class CodecLiveH265 extends Thread {
         FileWriter writer = null;
         try {
             // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-            writer = new FileWriter(Environment.getExternalStorageDirectory() + "/codecH265.txt", true);
+            writer = new FileWriter(Environment.getExternalStorageDirectory() + "/codecH264.txt", true);
             writer.write(sb.toString());
             writer.write("\n");
         } catch (IOException e) {
